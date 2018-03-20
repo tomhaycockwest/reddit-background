@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
+set -e
+
+SUBREDDIT=$(cat /Users/haycock-westt/.wallpaperrc | gshuf | head -1)
+SORT=top
+TIMEFRAME=week
+
+DESTINATION="/Users/haycock-westt/Pictures/desktop-wallpaper.jpg"
+
+function wallpaper() {
+	sqlite3 ~/Library/Application\ Support/Dock/desktoppicture.db "update data
+	set value = '$1'" && killall Dock 
+}
+
+IMAGE=$(curl -s -L "http://reddit.com/r/$SUBREDDIT/$SORT.json?t=$TIMEFRAME&limit=1" -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36' | jq -r -e '.data.children[0].data.url');
+
+curl -s $IMAGE > $DESTINATION
+
+if [ ${#IMAGE} -gt 10 ]
+then
+	wallpaper $DESTINATION
+fi
